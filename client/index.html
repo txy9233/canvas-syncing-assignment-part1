@@ -1,13 +1,54 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+  <head>
+    <script src="/socket.io/socket.io.js"></script>
     <script src="https://npmcdn.com/babel-core@5.8.38/browser.min.js"></script>
     <script type="text/babel" >
-        "use strict";
-    
-    </script>
-</head>
-<body>
+      "use strict";
+      let socket;
+      let totalScore;
+      let myScore = 0;
+      let myScoreElem;
+      // getting a random int between 2 values, inclusive: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random
+      const getRandomInt = (min, max) => {
+        min = Math.ceil(min);
+        max = Math.floor(max);
+        return Math.floor(Math.random() * (max - min +1)) + min;
+      }
+      
+      const generateScore = () =>{
+        let rand = getRandomInt(1, 10);
+        myScore += rand;
 
-</body>
+        myScoreElem.innerText = myScore;
+
+        socket.emit('updateScore', rand);
+      };
+
+      const update = (data) =>{
+        totalScore.innerText = data;
+      };
+
+      const init = () => {
+        totalScore = document.querySelector("#totalScore");
+        myScoreElem = document.querySelector("#myScore");
+        totalScore.innerText = "0"; 
+
+        socket = io.connect();
+
+        socket.on('connect', () =>{
+          setInterval(generateScore, 2000);  
+        });
+
+        socket.on('updated', update);
+      };
+
+      window.onload = init;
+
+    </script>
+  </head>
+  <body>
+    <h2>Total Score: <span id="totalScore"></span></h2>
+    <h3>My Score: <span id="myScore"></span></h3>
+  </body>
 </html>
